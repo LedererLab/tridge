@@ -1,6 +1,6 @@
 ---
-title: "Simulation Study of T-ridge"
-author: ""
+title: "Simulation Study for T-ridge"
+author: "Shih-Ting Huang"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
@@ -9,21 +9,41 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+### Settings
+
+##### Simulation parameters : 
+1. num.runs : Number of runs of the test (for averaging). 
+
+2. num.obs : Number of observations(n). 
+
+3. num.par : Number of parameters(p). 
+
+4. k : Magnitude of mutual correlations. 
+
+5. Test.case : Test cases for generalized linear models ("gaussian", "poisson", or "binomial"). 
+
+6. Stn : Signal-to-noise ratio for gaussian test case. 
+
 ```{r}
-##### Settings
-
-# Simulation parameters 
-num.runs <- 5 # number of runs of the test (for averaging)
-num.obs <- 100 # number of observations
-num.par <- 300 # number of parameters
-k <- 0 # Magnitude of mutual correlations
-
-##### Test Cases
-
-### gaussian, poisson, binomial
-Test.case <- "binomial"
+num.runs <- 1  
+num.obs <- 100 
+num.par <- 300 
+k <- 0 
+Test.case <- "gaussian"
+Stn <- 10
 ```
 
+
+### Required packages :
+
+1. glmnet : Applying cross validation for generalized linear models.
+
+2. MASS : Creating samples from multivariate normal distribution. 
+
+```{r}
+library(glmnet) 
+library(MASS) 
+```
 
 ```{r include=FALSE}
 # TREX parameters
@@ -35,116 +55,20 @@ if(Test.case=="gaussian") {
 
 class.num <- 1
 
-##### Required package
-
-library(glmnet) # Generalized linear model
-library(MASS) # Multivariate normal
-
-##### signal-to-noise ratio for gaussian test case 
 if(Test.case == "gaussian") {
-  stn <- 10 # signal-to-noise ratio
+  stn <- Stn 
 } else {
   stn <- NA
 }
 
 ##### Functions
-
-# Compute the L_q norm
-qnorm <- function(q, v){
-  (sum(abs(v) ^ q)) ^ (1 / q)
-}
-
 source("./qnorm.R")
-
-# Mean function in generalized linear model
-MeanFunction <- function (X, theta){
-  if (Test.case == "gaussain"){
-    result <- as.vector(X %*% theta)
-  } else if (Test.case == "poisson"){
-    result <- as.vector(exp(X %*% theta))
-  } else {
-    result <- as.vector(exp(X %*% theta)) / ( 1 + as.vector(exp(X %*% theta)))
-  }
-  return(result)
-}
-
 source("./MeanFunction.R")
-
-# b function in generalized linear model
-bFunction <- function(X, theta){
-  if (Test.case == "gaussian"){
-    result <- 0.5 * as.vector(X %*% theta) ^ 2  
-  } else if (Test.case == "poisson"){
-    result <- as.vector(exp(X %*% theta))
-  } else {
-    result <- log(1 + as.vector(exp(X %*% theta)))
-  }
-  return(result)
-}
-
-# mean.prime function in generalized linear model
-MeanPrime <- function (X, theta){
-  if (Test.case == "gaussian"){
-    result <- rep(1, dim(X)[2])
-  } else if (Test.case == "poisson"){
-    result <- as.vector(exp(X %*% theta))
-  } else {
-    result <- as.vector(exp(X %*% theta)) / (1 + 
-                                               as.vector(exp(X %*% theta))) ^ 2
-  }
-  return(result)
-}
-
-# Objective function
-ObjectiveFunction <- function(theta) {
-  if(Test.case == "gaussian") {
-    loss <- as.vector(y - X %*% theta) 
-    derivative <- as.vector(t(X) %*% (y - X %*% theta))
-    result <- (qnorm(2, loss) ^ 2- qnorm(2, y) ^ 2) / (TREX.c * qnorm(2, derivative)) + qnorm(2, theta)
-    return(result)
-  } else {
-    loss <- sum(y * as.vector(X %*% theta) - bFunction(X, theta)) 
-    tune.vector <- as.vector(t(y - MeanFunction(X, theta)) %*% X)
-    regularization <- qnorm(2, theta)
-    result <- -loss /  (TREX.c * qnorm(2, tune.vector)) + regularization
-    return(result)
-  }
-}
-
-# Gradient
-Gradient <- function(theta) {
-  if(Test.case == "gaussian") {
-    derivative <- t(X) %*% (y - X %*% theta)
-    loss <- (y - X %*% theta) 
-    result <- (qnorm(2, loss) ^ 2- qnorm(2, y) ^ 2) * t(X) %*% X %*% derivative / 
-      (TREX.c * qnorm(2, derivative) ^ 3) - 
-      2 * derivative / (TREX.c * qnorm(2, derivative)) +
-      theta / qnorm(2, theta)
-    return(result)
-  } else {
-    loss <- sum(y * as.vector(X %*% theta) - bFunction(X, theta)) 
-    tune.vector <- as.vector(t(y - MeanFunction(X, theta)) %*% X)
-    result <- -tune.vector / (TREX.c * qnorm(2, tune.vector)) - 
-      as.vector(0.5 * TREX.c * 2 * loss * t(tune.vector) %*% t(X) %*% (X * MeanPrime(X, theta)) / (TREX.c ^ 2 * qnorm(2, tune.vector) ^ 3)) + 
-      theta / qnorm(2, theta)
-    return(result)
-  }
-}
-
-ObjectEdr <- function(theta) {
-  if(Test.case=="gaussian") {
-    loss <- as.vector(y - X %*% theta)
-    derivative <- as.vector(t(X) %*% (y - X %*% theta))
-    result <- (qnorm(2, loss) ^ 2- qnorm(2, y) ^ 2) + u * qnorm(2, theta)
-    return(result)
-  } else {
-    loss <- sum(y * as.vector(X %*% theta) - bFunction(X, theta)) 
-    tune.vector <- as.vector(t(y - MeanFunction(X, theta)) %*% X)
-    regularization <- qnorm(2, theta)
-    result <- -loss + u * regularization
-    return(result)
-  }
-}
+source("./bFunction.R")
+source("./MeanPrime.R")
+source("./ObjectiveFunction.R")
+source("./Gradient.R")
+source("./ObjectEdr.R")
 
 GradientEdr <- function(theta) {
   if(Test.case=="gaussian") {

@@ -1,12 +1,12 @@
 ####################
-## bFunction #######
+## MeanPrime #######
 ####################
 
-bFunction <- function(X, theta, case){
+MeanPrime <- function (X, theta){
   # Description :
-  #               Compute the parametric vector for generalized linear models.
+  #               Compute the derivative of mean function for generalized linear models.
   # Usage : 
-  #         bFunction(X, theta)
+  #         MeanPrime(X, theta, case)
   # Arguments : 
   #   X : A design matrix of dimension n * p.
   #   theta : A vector of dimension p.
@@ -14,14 +14,13 @@ bFunction <- function(X, theta, case){
   #   A vector of dimension n for generalized linear models. 
   
   if (Test.case == "gaussian"){
-    result <- 0.5 * as.vector(X %*% theta) ^ 2  
+    result <- rep(1, dim(X)[2])
   } else if (Test.case == "poisson"){
     result <- as.vector(exp(X %*% theta))
   } else {
-    result <- log(1 + as.vector(exp(X %*% theta)))
+    result <- as.vector(exp(X %*% theta)) / (1 + 
+                                               as.vector(exp(X %*% theta))) ^ 2
   }
   return(result)
 }
-
-
 
