@@ -54,6 +54,8 @@ qnorm <- function(q, v){
   (sum(abs(v) ^ q)) ^ (1 / q)
 }
 
+source("./qnorm.R")
+
 # Mean function in generalized linear model
 MeanFunction <- function (X, theta){
   if (Test.case == "gaussain"){
