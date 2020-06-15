@@ -21,7 +21,7 @@ All of the codes in this repository are written in R and supports all plarforms 
 
 ## Dependencies
 
-This repository does not depend on any R libraries or external sources.
+This repository depends on R libraries glmnet and MASS.
 
 ## Licensing
 
