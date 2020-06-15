@@ -45,6 +45,19 @@ library(glmnet)
 library(MASS) 
 ```
 
+### Loading additional functions:
+
+```{r}
+source("./Additional functions/qnorm.R")
+source("./Additional functions/MeanFunction.R")
+source("./Additional functions/bFunction.R")
+source("./Additional functions/MeanPrime.R")
+source("./Additional functions/ObjectiveFunction.R")
+source("./Additional functions/Gradient.R")
+source("./Additional functions/ObjectEdr.R")
+
+```
+
 ```{r include=FALSE}
 # TREX parameters
 if(Test.case=="gaussian") {
@@ -62,14 +75,6 @@ if(Test.case == "gaussian") {
 }
 
 ##### Functions
-source("./qnorm.R")
-source("./MeanFunction.R")
-source("./bFunction.R")
-source("./MeanPrime.R")
-source("./ObjectiveFunction.R")
-source("./Gradient.R")
-source("./ObjectEdr.R")
-
 GradientEdr <- function(theta) {
   if(Test.case=="gaussian") {
     derivative <- t(X) %*% (y - X %*% theta)
