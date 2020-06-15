@@ -68,6 +68,8 @@ MeanFunction <- function (X, theta){
   return(result)
 }
 
+source("./MeanFunction.R")
+
 # b function in generalized linear model
 bFunction <- function(X, theta){
   if (Test.case == "gaussian"){

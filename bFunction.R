@@ -1,28 +1,29 @@
 ####################
-## MeanFunction ####
+## bFunction #######
 ####################
 
-# Mean function for generalized linear models
-MeanFunction <- function(X, theta, case){
+# b function for generalized linear models.
+bFunction <- function(X, theta, case){
   # Description :
-  #               Compute the mean vector for generalized linear models.
+  #               Compute the parametric vector for generalized linear models.
   # Usage : 
-  #         MeanFunction(X, theta, case)
+  #         bFunction(X, theta, case)
   # Arguments : 
   #   X : A design matrix of dimension n * p.
   #   theta : A vector of dimension p.
   #   case : The type of generalized linear models. 
   #          The options are "gaussian", "poisson", and "binomial".
   # Returns : 
-  #   A mean vector of dimension n 
+  #   A vector of dimension n 
   #   for the type of generalized linear model assigned by case argument. 
   
-  if (case == "gaussain"){
-    result <- as.vector(X %*% theta)
+  
+  if (case == "gaussian"){
+    result <- 0.5 * as.vector(X %*% theta) ^ 2  
   } else if (case == "poisson"){
     result <- as.vector(exp(X %*% theta))
   } else {
-    result <- as.vector(exp(X %*% theta)) / ( 1 + as.vector(exp(X %*% theta)))
+    result <- log(1 + as.vector(exp(X %*% theta)))
   }
   return(result)
 }
