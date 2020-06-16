@@ -9,21 +9,21 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-##### Description : 
+#### Description
 
 This is a R markdown document provides the simulation study of the method described in 
 **Tuning-free ridge estimators for high-dimensional generalized linear models** 
 by Shih-Ting Huang, Fang Xie, and Johannes Lederer.
 
-##### Settings : 
+#### Settings
 
 The settings include some simulation parameters described in the following :   
 
 1. num.runs : Number of runs of the test (for averaging). 
 
-2. num.obs : Number of observations(n). 
+2. num.obs : Number of observations (n). 
 
-3. num.par : Number of parameters(p). 
+3. num.par : Number of parameters (p). 
 
 4. k : Magnitude of mutual correlations. 
 
@@ -40,7 +40,7 @@ Test.case <- "gaussian"
 Stn <- 10
 ```
 
-##### Required packages :
+#### Required packages
 
 The required packages for this simulation study contains : 
 
@@ -59,7 +59,7 @@ library(htmlTable)
 library(pander)
 ```
 
-##### Loading additional functions : 
+#### Loading additional functions
 
 Some additional functions are loaded below and the description of each function 
 can be found in the folder named **Additional functions**.
@@ -79,7 +79,7 @@ source("./Additional functions/ObjectLs.R")
 source("./Additional functions/GradientLs.R")
 ```
 
-##### Simulation process : 
+#### Simulation process
 
 The simulation process is performed by two parts : 
 
@@ -116,7 +116,7 @@ for (run in 1:num.runs){
 }
 ```
 
-##### Results and Output
+#### Results and Output
 
 The results are summarized by R dataframe and the output is formatted by HTML table.
 
