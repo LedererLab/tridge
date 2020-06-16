@@ -48,7 +48,7 @@ if(Test.case=="gaussian") {
 
 #Signal-to.noise ratio
 if(Test.case == "gaussian") {
-  stn <- Stn 
+  stn <- SNR 
 } else {
   stn <- NA
 }
