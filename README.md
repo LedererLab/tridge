@@ -14,7 +14,7 @@ We provide an example code in `SimulationStudy.Rmd` for a comparison of averaged
 
 * Johannes Lederer, Professor in Mathematical Statistics, Ruhr-University Bochum
 
-### Other folders
+## Other folders
 
 **Additional functions** : The source codes of some functions loaded in `SimulationStudy.Rmd` that are required in the simulation study.
 
