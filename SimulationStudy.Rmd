@@ -11,7 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ##### Description : 
 
-This is a R markdown document provides the simulation study of the method described in **Tuning-free ridge estimators for high-dimensional generalized linear models** by Shih-Ting Huang, Fang Xie, and Johannes Lederer.
+This is a R markdown document provides the simulation study of the method described in 
+**Tuning-free ridge estimators for high-dimensional generalized linear models** 
+by Shih-Ting Huang, Fang Xie, and Johannes Lederer.
 
 ##### Settings : 
 
@@ -59,7 +61,8 @@ library(pander)
 
 ##### Loading additional functions : 
 
-Some additional functions are loaded below and the description of each function can be found in the folder named **Additional functions**.
+Some additional functions are loaded below and the description of each function 
+can be found in the folder named **Additional functions**.
 
 ```{r}
 source("./Additional functions/qnorm.R")
