@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #### Description
 
-This is a R markdown document provides the simulation study of the method described in 
+This is an R markdown document provides the simulation study of the method described in 
 **Tuning-free ridge estimators for high-dimensional generalized linear models** 
 by Shih-Ting Huang, Fang Xie, and Johannes Lederer.
 
@@ -29,7 +29,7 @@ The settings include some simulation parameters described in the following :
 
 5. Test.case : Test cases for generalized linear models ("gaussian", "poisson", or "binomial"). 
 
-6. Stn : Signal-to-noise ratio for gaussian test case. 
+6. SNR : Signal-to-noise ratio for gaussian test case. 
 
 ```{r}
 num.runs <- 1  
@@ -37,7 +37,7 @@ num.obs <- 100
 num.par <- 300 
 k <- 0 
 Test.case <- "gaussian"
-Stn <- 10
+SNR <- 10
 ```
 
 #### Required packages
@@ -101,7 +101,7 @@ For each loop, we contain the following four steps in order :
 
 1. Data generation.
 
-2. K-fold cross validation pipeline.
+2. 10-fold cross validation pipeline.
 
 3. T-ridge pipeline.
 
@@ -134,7 +134,7 @@ htmlTable(output,
           rnames = "Mean relative errors",
           rgroup = paste0("Case : ", Test.case),
           n.rgroup = c(1),
-          cgroup = c(pander("$\\frac{||X\\hat{\\beta}_{T-ridge} - X\\beta^{*}||_{2}}{||X\\beta^{*}||_{2}}$"), pander("$\\frac{||\\hat{\\beta}_{T-ridge} - \\beta^{*}||_{2}}{||\\beta^{*}||_{2}}$")),
+          cgroup = c(pander("$\\frac{||X\\hat{\\beta}_{t-ridge} - X\\beta^{*}||_{2}}{||X\\beta^{*}||_{2}}$"), pander("$\\frac{||\\hat{\\beta}_{t-ridge} - \\beta^{*}||_{2}}{||\\beta^{*}||_{2}}$")),
           n.cgroup = c(2,2), 
           caption=paste0("(n,p,k)=(", num.obs, ",", num.par, ",", k, ")"))
 ```
