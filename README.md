@@ -37,5 +37,5 @@ view the MIT license please consult `LICENSE.txt`.
 ## References
  [Tuning-free ridge estimators for high-dimensional generalized linear models](https://arxiv.org/abs/2002.11916)
  
- Cite as "S. Huang, F. Xie, and J. Lederer, Tuning-free ridge estimators for high-dimensional generalized linear models, arXiv:2002.11916".
+ Cite as "S. Huang, F. Xie, and J. Lederer. Tuning-free ridge estimators for high-dimensional generalized linear models. arXiv:2002.11916".
 
