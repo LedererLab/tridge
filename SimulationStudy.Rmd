@@ -1,6 +1,6 @@
 ---
 title: "Simulation Study for T-ridge"
-author: "Shih-Ting Huang"
+author: "Shih-Ting Huang, Fang Xie, and Johannes Lederer"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
@@ -9,9 +9,14 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### Settings
+##### Description : 
 
-##### Simulation parameters : 
+This is a R markdown document provides the simulation study of the method described in **Tuning-free ridge estimators for high-dimensional generalized linear models** by Shih-Ting Huang, Fang Xie, and Johannes Lederer.
+
+##### Settings : 
+
+The settings include some simulation parameters described in the following :   
+
 1. num.runs : Number of runs of the test (for averaging). 
 
 2. num.obs : Number of observations(n). 
@@ -33,8 +38,9 @@ Test.case <- "gaussian"
 Stn <- 10
 ```
 
+##### Required packages :
 
-### Required packages :
+The required packages for this simulation study contains : 
 
 1. glmnet : Applying cross validation for generalized linear models.
 
@@ -51,7 +57,9 @@ library(htmlTable)
 library(pander)
 ```
 
-### Loading additional functions:
+##### Loading additional functions : 
+
+Some additional functions are loaded below and the description of each function can be found in the folder named **Additional functions**.
 
 ```{r}
 source("./Additional functions/qnorm.R")
@@ -68,23 +76,33 @@ source("./Additional functions/ObjectLs.R")
 source("./Additional functions/GradientLs.R")
 ```
 
-### Simulation process:
+##### Simulation process : 
 
-##### 1. Initialization process.
+The simulation process is performed by two parts : 
+
+1. Initialization process.
+
+2. Loop over the number of runs.
+
+Initialization process : 
+
+This process initialize the absolute errors that are going to be computed later and basic setup.
 
 ```{r}
 source("./SimulationProcess/Initialize.R")
 ```
 
-##### 2. Loop over the number of runs : 
+Loop over the number of runs : 
 
-###### 2.1 Data generation.
+For each loop, we contain the following four steps in order : 
 
-###### 2.2 K-fold cross validation pipeline.
+1. Data generation.
 
-###### 2.3 T-ridge pipeline.
+2. K-fold cross validation pipeline.
 
-###### 2.4 Compute errors.
+3. T-ridge pipeline.
+
+4. Compute errors.
 
 ```{r}
 for (run in 1:num.runs){
@@ -95,15 +113,17 @@ for (run in 1:num.runs){
 }
 ```
 
-### Results and Output
+##### Results and Output
 
-##### 1. Results
+The results are summarized by R dataframe and the output is formatted by HTML table.
+
+Results : 
 
 ```{r}
 source("./SimulationProcess/ResultsOutput.R")
 ```
 
-##### 2. Output HTML Table
+Output HTML Table :
 
 ```{r}
 htmlTable(output,
