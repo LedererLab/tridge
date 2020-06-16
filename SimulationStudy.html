@@ -364,7 +364,7 @@ summary {
 
 <h1 class="title toc-ignore">Simulation Study for T-ridge</h1>
 <h4 class="author">Shih-Ting Huang</h4>
-<h4 class="date">15 June, 2020</h4>
+<h4 class="date">16 June, 2020</h4>
 
 </div>
 
@@ -394,12 +394,16 @@ Stn &lt;- 10</code></pre>
 <ol style="list-style-type: decimal">
 <li><p>glmnet : Applying cross validation for generalized linear models.</p></li>
 <li><p>MASS : Creating samples from multivariate normal distribution.</p></li>
+<li><p>htmlTable : Creating html tables for simulation result.</p></li>
+<li><p>pander : Using specified text elements for output results.</p></li>
 </ol>
 <pre class="r"><code>library(glmnet) </code></pre>
 <pre><code>## Loading required package: Matrix</code></pre>
 <pre><code>## Loading required package: foreach</code></pre>
 <pre><code>## Loaded glmnet 2.0-18</code></pre>
-<pre class="r"><code>library(MASS) </code></pre>
+<pre class="r"><code>library(MASS) 
+library(htmlTable)
+library(pander)</code></pre>
 </div>
 <div id="loading-additional-functions" class="section level3">
 <h3>Loading additional functions:</h3>
@@ -409,7 +413,57 @@ source(&quot;./Additional functions/bFunction.R&quot;)
 source(&quot;./Additional functions/MeanPrime.R&quot;)
 source(&quot;./Additional functions/ObjectiveFunction.R&quot;)
 source(&quot;./Additional functions/Gradient.R&quot;)
-source(&quot;./Additional functions/ObjectEdr.R&quot;)</code></pre>
+source(&quot;./Additional functions/ObjectEdr.R&quot;)
+source(&quot;./Additional functions/GradientEdr.R&quot;)
+source(&quot;./Additional functions/ObjectRidge.R&quot;)
+source(&quot;./Additional functions/GradientRidge.R&quot;)
+source(&quot;./Additional functions/ObjectLs.R&quot;)
+source(&quot;./Additional functions/GradientLs.R&quot;)</code></pre>
+</div>
+<div id="simulation-process" class="section level3">
+<h3>Simulation process:</h3>
+<div id="initialization-process." class="section level5">
+<h5>1. Initialization process.</h5>
+<pre class="r"><code>source(&quot;./SimulationProcess/Initialize.R&quot;)</code></pre>
+</div>
+<div id="loop-over-the-number-of-runs" class="section level5">
+<h5>2. Loop over the number of runs :</h5>
+<div id="data-generation." class="section level6">
+<h6>2.1 Data generation.</h6>
+</div>
+<div id="k-fold-cross-validation-pipeline." class="section level6">
+<h6>2.2 K-fold cross validation pipeline.</h6>
+</div>
+<div id="t-ridge-pipeline." class="section level6">
+<h6>2.3 T-ridge pipeline.</h6>
+</div>
+<div id="compute-errors." class="section level6">
+<h6>2.4 Compute errors.</h6>
+<pre class="r"><code>for (run in 1:num.runs){
+  source(&quot;./SimulationProcess/DataGeneration.R&quot;)
+  source(&quot;./SimulationProcess/K-foldCV.R&quot;)
+  source(&quot;./SimulationProcess/TRidge.R&quot;)
+  source(&quot;./SimulationProcess/ComputeErrors.R&quot;)
+}</code></pre>
+</div>
+</div>
+</div>
+<div id="results-and-output" class="section level3">
+<h3>Results and Output</h3>
+<div id="results" class="section level5">
+<h5>1. Results</h5>
+<pre class="r"><code>source(&quot;./SimulationProcess/ResultsOutput.R&quot;)</code></pre>
+</div>
+<div id="output-html-table" class="section level5">
+<h5>2. Output HTML Table</h5>
+<pre class="r"><code>htmlTable(output,
+          header =  H,
+          rnames = &quot;Mean relative errors&quot;,
+          rgroup = paste0(&quot;Case : &quot;, Test.case),
+          n.rgroup = c(1),
+          cgroup = c(pander(&quot;$\\frac{||X\\hat{\\beta}_{T-ridge} - X\\beta^{*}||_{2}}{||X\\beta^{*}||_{2}}$&quot;), pander(&quot;$\\frac{||\\hat{\\beta}_{T-ridge} - \\beta^{*}||_{2}}{||\\beta^{*}||_{2}}$&quot;)),
+          n.cgroup = c(2,2), 
+          caption=paste0(&quot;(n,p,k)=(&quot;, num.obs, &quot;,&quot;, num.par, &quot;,&quot;, k, &quot;)&quot;))</code></pre>
 <table class="gmisc_table" style="border-collapse: collapse; margin-top: 1em; margin-bottom: 1em;">
 <thead>
 <tr>
@@ -464,20 +518,21 @@ Case : gaussian
 0.29
 </td>
 <td style="border-bottom: 2px solid grey; text-align: center;">
-0.53
+0.55
 </td>
 <td style="border-bottom: 2px solid grey;" colspan="1">
  
 </td>
 <td style="border-bottom: 2px solid grey; text-align: center;">
-0.35
+0.37
 </td>
 <td style="border-bottom: 2px solid grey; text-align: center;">
-0.61
+0.63
 </td>
 </tr>
 </tbody>
 </table>
+</div>
 </div>
 
 

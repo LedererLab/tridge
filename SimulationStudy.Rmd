@@ -40,9 +40,15 @@ Stn <- 10
 
 2. MASS : Creating samples from multivariate normal distribution. 
 
+3. htmlTable : Creating html tables for simulation result.
+
+4. pander : Using specified text elements for output results.
+
 ```{r}
 library(glmnet) 
 library(MASS) 
+library(htmlTable)
+library(pander)
 ```
 
 ### Loading additional functions:
@@ -55,294 +61,51 @@ source("./Additional functions/MeanPrime.R")
 source("./Additional functions/ObjectiveFunction.R")
 source("./Additional functions/Gradient.R")
 source("./Additional functions/ObjectEdr.R")
-
+source("./Additional functions/GradientEdr.R")
+source("./Additional functions/ObjectRidge.R")
+source("./Additional functions/GradientRidge.R")
+source("./Additional functions/ObjectLs.R")
+source("./Additional functions/GradientLs.R")
 ```
 
-```{r include=FALSE}
-# TREX parameters
-if(Test.case=="gaussian") {
-  TREX.c.vector <- 2 
-} else {
-  TREX.c.vector <- 1
-}
+### Simulation process:
 
-class.num <- 1
+##### 1. Initialization process.
 
-if(Test.case == "gaussian") {
-  stn <- Stn 
-} else {
-  stn <- NA
-}
+```{r}
+source("./SimulationProcess/Initialize.R")
+```
 
-##### Functions
-GradientEdr <- function(theta) {
-  if(Test.case=="gaussian") {
-    derivative <- t(X) %*% (y - X %*% theta)
-    result <- -2 * derivative + u * theta / qnorm(2, theta)
-    return(result)
-  } else {
-    loss <- sum(y * as.vector(X %*% theta) - bFunction(X, theta)) 
-    tune.vector <- as.vector(t(y - MeanFunction(X, theta)) %*% X)
-    result <- -tune.vector  + u * theta / qnorm(2, theta)
-    return(result)
-  }
-}
+##### 2. Loop over the number of runs : 
 
-ObjectRidge <- function(theta) {
-  if(Test.case=="gaussian") {
-    loss <- as.vector(y - X %*% theta)
-    derivative <- as.vector(t(X) %*% (y - X %*% theta))
-    result <- (qnorm(2, loss) ^ 2- qnorm(2, y) ^ 2) + r * qnorm(2, theta) ^ 2
-    return(result)
-  } else {
-    loss <- sum(y * as.vector(X %*% theta) - bFunction(X, theta)) 
-    tune.vector <- as.vector(t(y - MeanFunction(X, theta)) %*% X)
-    regularization <- qnorm(2, theta) ^ 2
-    result <- -loss + r * regularization
-    return(result)
-  }
-}
+###### 2.1 Data generation.
 
-GradientRidge <- function(theta) {
-  if(Test.case=="gaussian") {
-    derivative <- t(X) %*% (y - X %*% theta)
-    result <- -2 * derivative + r * 2 * qnorm(2, theta)
-    return(result)
-  } else {
-    loss <- sum(y * as.vector(X %*% theta) - bFunction(X, theta)) 
-    tune.vector <- as.vector(t(y - MeanFunction(X, theta)) %*% X)
-    result <- -tune.vector  + r * 2 * qnorm(2, theta)
-    return(result)
-  }
-}
+###### 2.2 K-fold cross validation pipeline.
 
-ObjectLs <- function(theta) {
-  if(Test.case=="gaussian") {
-    loss <- as.vector(y - X %*% theta)
-    derivative <- as.vector(t(X) %*% (y - X %*% theta))
-    result <- (qnorm(2, loss) ^ 2- qnorm(2, y) ^ 2) 
-    return(result)
-  } else {
-    loss <- sum(y * as.vector(X %*% theta) - bFunction(X, theta)) 
-    tune.vector <- as.vector(t(y - MeanFunction(X, theta)) %*% X)
-    regularization <- qnorm(2, theta) ^ 2
-    result <- -loss 
-    return(result)
-  }
-}
+###### 2.3 T-ridge pipeline.
 
-GradientLs <- function(theta) {
-  if(Test.case=="gaussian") {
-    derivative <- t(X) %*% (y - X %*% theta)
-    result <- -2 * derivative 
-    return(result)
-  } else {
-    loss <- sum(y * as.vector(X %*% theta) - bFunction(X, theta)) 
-    tune.vector <- as.vector(t(y - MeanFunction(X, theta)) %*% X)
-    result <- -tune.vector
-    return(result)
-  }
-}
+###### 2.4 Compute errors.
 
-# Initialize absolute error
-errors.TREX <- matrix(nrow=num.runs, ncol=length(TREX.c.vector))
-relative.errors.TREX <- matrix(nrow=num.runs, ncol=length(TREX.c.vector))
-errors.CV10 <- rep(NA, num.runs)
-relative.errors.CV10 <- rep(NA, num.runs)
-
-
-beta.error.TREX <- matrix(nrow=num.runs, ncol=length(TREX.c.vector))
-relative.beta.error.TREX <- matrix(nrow=num.runs, ncol=length(TREX.c.vector))
-beta.error.CV10 <- rep(NA, num.runs)
-relative.beta.error.CV10 <- rep(NA, num.runs)
-
-ratio <- rep(NA, num.runs)
-
-##### Loop over the number of runs
-
+```{r}
 for (run in 1:num.runs){
-  
-  ##### Generate the test setting
-  
-  cat(sprintf("run %d out of %d runs\n", run, num.runs))
-  cat("  -> generate test case... ")
-  
-  # design matrix
-  sigma <- matrix(nrow=num.par, ncol=num.par)
-  for(rr in 1:num.par) {
-    for(cc in 1:num.par) {
-      sigma[rr, cc] <- k ^ abs(rr - cc)
-    }
-  }
-  mu <- rep(0, num.par)
-  X <- mvrnorm(n = num.obs, mu=mu, Sigma=sigma)
-  
-  # Normalize each column of the design matrix
-  cat("  -> Normalize each column of the design matrix... ")
-  norm <- rep(0, num.par)
-  for(i in 1:num.par) {
-    nv <- as.vector(X[, i])
-    norm[i] <- as.numeric(sqrt(t(nv) %*% nv))
-    X[, i] <- nv / norm[i]
-  }
-  cat("done\n")
-  
-  # Singular value decomposition of X
-  if(num.obs < num.par){
-    SVD <- svd(X)
-    U <- SVD$u
-    V <- SVD$v
-  } else {
-    SVD <- svd(X, nu = num.obs, nv = num.par)
-    U <- SVD$u
-    V <- SVD$v
-  }
-  
-  # regression vector
-  Projection <- V %*% t(V)
-  if(Test.case=="gaussian") {
-    beta <- rnorm(num.par, mean = 0, sd = 1) 
-    beta <- Projection %*% beta
-  } else if(Test.case=="poisson") {
-    beta <- rnorm(num.par, mean = 0, sd = 1) 
-    beta <- Projection %*% beta
-  } else {
-    beta <- rnorm(num.par, mean = 0, sd = 1) 
-    beta <- Projection %*% beta
-  }
-  
-  # outcome
-  y <- rep(NA, num.obs)
-  for(i in 1:num.obs) {
-    if(Test.case == "gaussian") {
-      y[i] <- rnorm(1, mean=as.vector(X %*% beta)[i], sd=sqrt(stn ^ -1 * var(X %*% beta)))
-    } else if(Test.case == "poisson") {
-      y[i] <- rpois(1, lambda=as.vector(exp(X %*% beta))[i])
-    } else {
-      y[i] <- rbinom(1, size=class.num, prob=as.vector(exp(X %*% beta) / (1 + exp(X %*% beta)))[i]) 
-    }
-  }
-  cat("done\n")
-
-  # Perform the K-fold cross validation pipeline
-  cat("  -> Perform the K-fold cross validation pipeline... ")
-  if(num.obs < num.par) {
-    cv <- cv.glmnet(X, y, nfolds=10, alpha=0, family=Test.case)
-    cv.estimation <- glmnet(X, y, alpha=0, family=Test.case, lambda=cv$lambda.min)
-    CV.estimator <- as.vector(coef(cv.estimation))[-1]
-  } else {
-    cv.estimation <- glmnet(X, y, alpha=0, family=Test.case, lambda=0)
-    CV.estimator <- as.vector(coef(cv.estimation))[-1]
-  }
-  cat("done\n")
-  
-  # Perform the T-ridge pipeline
-  cat("  -> compute T-ridge estimators... ")
-  
-  init <- optim(par=rep(0, num.par), fn=ObjectLs, gr=GradientLs, 
-                method="CG")
-  init.vector <- init$par
-  GlmTrex.estimators <- matrix(nrow=num.par, ncol=length(TREX.c.vector))
-  for(trex.e in 1:length(TREX.c.vector)) {
-    TREX.c <- TREX.c.vector[trex.e]
-    GlmTrex.estimation <- optim(par=init.vector, fn=ObjectiveFunction, gr=Gradient, method="CG")
-    GlmTrex.estimators[, trex.e] <- GlmTrex.estimation$par 
-  }
-  
-  length.tuning <- 1000
-  edr.lambda <- qnorm(2, GradientLs(GlmTrex.estimators)) / (2 * qnorm(2, GlmTrex.estimators))
-  r.max <- edr.lambda + 0.1
-  r.min <- max(0.05, (edr.lambda - 0.1))
-  if(r.min == Inf || r.max == Inf ) {
-    tuning.parameters <- seq(1e+10, 1e+11, length.out=length.tuning)
-  } else {
-    tuning.parameters <- seq(r.min, r.max, length.out=length.tuning)
-  }
-  init <- cv.glmnet(X, y, nfolds=10, alpha=0, family=Test.case)
-  init.estimation <- glmnet(X, y, alpha=0, family=Test.case, lambda=init$lambda.min)
-  init.vector <- as.vector(coef(init.estimation))[-1]
-  Ridge.estimators <- matrix(nrow=num.par, ncol=length.tuning)
-  cost <- rep(0, length.tuning)
-  for(tune in 1:length.tuning) {
-    r <- tuning.parameters[tune]
-    if(Test.case=="gaussian") {
-      estimation <- glmnet(X, y, alpha=0, family=Test.case, lambda=r)
-      Ridge.estimators[, tune] <- as.vector(coef(estimation)[-1])
-    } else {
-      estimation <- optim(par=init.vector, fn=ObjectRidge, gr=GradientRidge, method="CG")
-    Ridge.estimators[, tune] <- estimation$par 
-    }
-    estimator.r <- as.vector(Ridge.estimators[, tune])
-    cost[tune] <- ObjectiveFunction(estimator.r) 
-  }
-  estimator <- Ridge.estimators[, which.min(cost)]
-  cat("done\n")
-  
-  ##### Compute the prediction errors 
-  cat("  -> compute errors... ")
-  
-  # Prediction error
-  for(trex.err in 1:length(TREX.c.vector)) {
-    errors.TREX[run, trex.err] <- qnorm(2, abs(X %*% (estimator - beta))) / sqrt(num.obs)
-  }
-  errors.CV10[run] <- qnorm(2, abs(X %*% (CV.estimator - beta))) / sqrt(num.obs) 
-  
-  #Relative Prediction error
-  relative.errors.TREX[run, ] <- errors.TREX[run, ] / qnorm(2, (X %*% beta)) * sqrt(num.obs)
-  relative.errors.CV10[run] <- errors.CV10[run] / qnorm(2, (X %*% beta)) * sqrt(num.obs)
-  
-  # beta error
-  for(trex.b.err in 1:length(TREX.c.vector)) {
-    beta.error.TREX[run, trex.b.err] <- qnorm(2, (estimator - beta))
-  }
-  beta.error.CV10[run] <- qnorm(2, (CV.estimator - beta))
-  
-  #relative beta error
-  relative.beta.error.TREX[run, ] <- beta.error.TREX[run, ] / qnorm(2, beta)
-  relative.beta.error.CV10[run] <- beta.error.CV10[run] / qnorm(2, beta)
-  
-  cat("done\n")
+  source("./SimulationProcess/DataGeneration.R")
+  source("./SimulationProcess/K-foldCV.R")
+  source("./SimulationProcess/TRidge.R")
+  source("./SimulationProcess/ComputeErrors.R")
 }
-
-##### Output results
-output.Data <- matrix(nrow = (length(TREX.c.vector) + 1), ncol = 4)
-for(case in 1:length(TREX.c.vector)){
-  output.Data[case, ] <- c(mean(errors.TREX[, case]), mean(beta.error.TREX[, case]), mean(relative.errors.TREX[, case]), mean(relative.beta.error.TREX[, case]))
-}
-output.Data[(case + 1), ] <- c(mean(errors.CV10), mean(beta.error.CV10), mean(relative.errors.CV10), mean(relative.beta.error.CV10))
-names <- rep("", length(TREX.c.vector))
-for(name in 1:length(TREX.c.vector)) {
-  names[name] <- paste0("T-ridge", TREX.c.vector[name])
-}
-if(num.obs < num.par) {
-  rownames(output.Data) <- c(names, "10-fold CV")
-} else {
-  rownames(output.Data) <- c(names, "MLE")
-}
-
-colnames(output.Data)<- c("Xbeta", "Beta", "r.Xbeta", "r.Beta")
-cat("Simulation Results : \n")
 ```
 
-```{r echo=FALSE}
-output <- 
-  matrix(c(round(output.Data[1, 3], 2),
-            round(output.Data[2, 3], 2),
-            round(output.Data[1, 4], 2),
-            round(output.Data[2, 4], 2)), 
-         ncol=4, byrow = TRUE)
+### Results and Output
 
-library(htmlTable)
-library(pander)
+##### 1. Results
 
-if(num.obs < num.par) {
-  H <- c("T-ridge", "10-fold CV",
-                            "T-ridge", "10-fold CV")
-} else {
-  H <- c("T-ridge(sd)", "MLE(sd)",
-                            "T-ridge(sd)", "MLE(sd)")
-}
+```{r}
+source("./SimulationProcess/ResultsOutput.R")
+```
 
+##### 2. Output HTML Table
+
+```{r}
 htmlTable(output,
           header =  H,
           rnames = "Mean relative errors",
@@ -352,6 +115,4 @@ htmlTable(output,
           n.cgroup = c(2,2), 
           caption=paste0("(n,p,k)=(", num.obs, ",", num.par, ",", k, ")"))
 ```
-
-
 
