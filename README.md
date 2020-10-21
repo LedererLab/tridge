@@ -20,6 +20,8 @@ We provide an example code in `SimulationStudy.Rmd` for a comparison of averaged
 
 **SimulationProcess** : The source codes loaded in `SimulationStudy.Rmd` for generating the simulation results.
 
+**RealData** : Two data sets, `mass-spec500peaks.csv`, and `riboflavin.csv` for applying the t-ridge pipeline on real data and the R codes, `RealData.R` for the real data analysis.
+
 ## Supported languages and platforms
 
 All of the codes in this repository are written in R and supports all plarforms which are
