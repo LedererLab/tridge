@@ -2,6 +2,9 @@
 
 This repository provides the implementations of the methods described in [Tuning-free ridge estimators for high-dimensional generalized linear models](https://arxiv.org/abs/2002.11916).
 
+## See also
+An R package for the T-Ridge can be found here https://github.com/mohan-zhao/myTridge. Most of the functions are implemented in C++.
+
 ## Simulations
 
 We provide an example code in `SimulationStudy.Rmd` for a comparison of averaged relative prediction errors with 10-fold cross-validated ridge for three types of generalized linear models including Gaussian, Poisson, and Bernoulli cases. Developed for `R 3.6.1`.
